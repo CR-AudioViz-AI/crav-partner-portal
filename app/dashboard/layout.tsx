@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   Users,
-  Handshake,
+  Briefcase,
   Package,
   FileText,
   Settings,
@@ -24,7 +24,7 @@ import JavariChatWidget from '@/components/JavariChatWidget'
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/dashboard/leads', icon: Users, label: 'Leads' },
-  { href: '/dashboard/deals', icon: Handshake, label: 'Deals' },
+  { href: '/dashboard/deals', icon: Briefcase, label: 'Deals' },
   { href: '/dashboard/products', icon: Package, label: 'Products' },
   { href: '/dashboard/documents', icon: FileText, label: 'Documents' },
   { href: '/dashboard/apply', icon: ClipboardList, label: 'Application' },
