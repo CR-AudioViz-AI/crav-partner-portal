@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import {
-  Handshake,
+  Target,
   Search,
   Filter,
   DollarSign,
@@ -118,7 +118,7 @@ export default function DealsPage() {
         <div className="bg-white rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-              <Handshake className="w-5 h-5 text-blue-600" />
+              <Target className="w-5 h-5 text-blue-600" />
             </div>
             <span className="text-gray-600 font-medium">Total Deals</span>
           </div>
@@ -191,7 +191,7 @@ export default function DealsPage() {
       {/* Deals List */}
       {filteredDeals.length === 0 ? (
         <div className="bg-white rounded-2xl p-8 text-center">
-          <Handshake className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <Target className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <h3 className="font-semibold text-gray-900 mb-1">No deals found</h3>
           <p className="text-gray-500">
             {deals.length === 0
