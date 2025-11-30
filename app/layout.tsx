@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import type { Metadata } from 'next'
 import { Toaster } from 'sonner'
 import './globals.css'
@@ -31,6 +32,8 @@ export default function RootLayout({
             duration: 4000,
           }}
         />
+              {/* Javari AI Assistant */}
+        <Script src="https://javariai.com/embed.js" strategy="lazyOnload" />
       </body>
     </html>
   )
