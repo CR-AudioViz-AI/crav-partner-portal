@@ -79,8 +79,9 @@ export default function DashboardPage() {
         const { data: partnerData } = await getPartnerByUserId(user.id)
         if (partnerData) {
           setPartner(partnerData)
-          const { data: statsData } = await getDashboardStats(partnerData.id)
-          setStats(statsData)
+          const statsData = await getDashboardStats(partnerData.id)
+          if (statsData) {
+            setStats(statsData)
         }
       }
     } catch (error) {
