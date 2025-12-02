@@ -177,14 +177,9 @@ CREATE POLICY "Partners can view own deals" ON deals
 CREATE POLICY "Anyone can view active products" ON products
   FOR SELECT USING (active = true);
 
--- RLS Policies for documents
-CREATE POLICY "Partners can view documents for their tier" ON documents
-  FOR SELECT USING (
-    partner_tier_required IN (
-      SELECT tier FROM partners WHERE user_id = auth.uid()
-      UNION SELECT 'STARTER'
-    )
-  );
+-- RLS Policies for documents (simplified - all authenticated users can view)
+CREATE POLICY "Authenticated users can view documents" ON documents
+  FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- Insert sample products
 INSERT INTO products (name, description, tier, difficulty, base_price, commission_year1, commission_recurring, target_buyer, sales_cycle_days, training_required) VALUES
