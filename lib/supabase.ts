@@ -1,150 +1,48 @@
-import { createClient } from '@supabase/supabase-js'
+// ============================================================================
+// UNIVERSAL SUPABASE CLIENT - CR AUDIOVIZ AI ECOSYSTEM
+// Centralized database connection for all apps
+// Dependency-free version (only requires @supabase/supabase-js)
+// ============================================================================
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Centralized Supabase configuration
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kteobfyferrukqeolofj.supabase.co';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZW9iZnlmZXJydWtxZW9sb2ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxOTcyNjYsImV4cCI6MjA3NzU1NzI2Nn0.uy-jlF_z6qVb8qogsNyGDLHqT4HhmdRhLrW7zPv3qhY';
 
-// Server-side client with service role key
-export const createServerClient = () => {
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(supabaseUrl, supabaseServiceKey)
-}
+// Standard client for general use
+export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Auth helpers
-export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-  return { data, error }
-}
+// Browser client for auth (SSR-safe singleton pattern)
+let browserClient: SupabaseClient | null = null;
 
-export const signUp = async (email: string, password: string, fullName: string) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
-      },
-    },
-  })
-  return { data, error }
-}
-
-export const signOut = async () => {
-  const { error } = await supabase.auth.signOut()
-  return { error }
-}
-
-export const getSession = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession()
-  return { session, error }
-}
-
-export const getUser = async () => {
-  const { data: { user }, error } = await supabase.auth.getUser()
-  return { user, error }
-}
-
-// Database helpers
-export const getPartnerByUserId = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('partners')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
-  return { data, error }
-}
-
-export const getLeadsByPartnerId = async (partnerId: string) => {
-  const { data, error } = await supabase
-    .from('leads')
-    .select('*')
-    .eq('partner_id', partnerId)
-    .order('created_at', { ascending: false })
-  return { data, error }
-}
-
-export const getDealsByPartnerId = async (partnerId: string) => {
-  const { data, error } = await supabase
-    .from('deals')
-    .select('*, leads(*), products(*)')
-    .eq('partner_id', partnerId)
-    .order('created_at', { ascending: false })
-  return { data, error }
-}
-
-export const getProducts = async (activeOnly = true) => {
-  let query = supabase.from('products').select('*')
-  if (activeOnly) {
-    query = query.eq('active', true)
+export function createSupabaseBrowserClient(): SupabaseClient {
+  if (typeof window === 'undefined') {
+    // Server-side: return new client each time
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
-  const { data, error } = await query.order('tier', { ascending: true })
-  return { data, error }
-}
-
-export const getDocuments = async (partnerTier: string) => {
-  const tierOrder = ['STARTER', 'PROVEN', 'ELITE', 'ELITE_PLUS']
-  const tierIndex = tierOrder.indexOf(partnerTier)
-  const accessibleTiers = tierOrder.slice(0, tierIndex + 1)
   
-  const { data, error } = await supabase
-    .from('documents')
-    .select('*')
-    .in('partner_tier_required', accessibleTiers)
-    .order('created_at', { ascending: false })
-  return { data, error }
-}
-
-export const submitPartnerApplication = async (application: Record<string, unknown>) => {
-  const { data, error } = await supabase
-    .from('partner_applications')
-    .insert([application])
-    .select()
-    .single()
-  return { data, error }
-}
-
-export const getDashboardStats = async (partnerId: string) => {
-  const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  
-  // Get leads count
-  const { count: totalLeads } = await supabase
-    .from('leads')
-    .select('*', { count: 'exact', head: true })
-    .eq('partner_id', partnerId)
-  
-  // Get leads this month
-  const { count: leadsThisMonth } = await supabase
-    .from('leads')
-    .select('*', { count: 'exact', head: true })
-    .eq('partner_id', partnerId)
-    .gte('created_at', startOfMonth)
-  
-  // Get deals
-  const { data: deals } = await supabase
-    .from('deals')
-    .select('*')
-    .eq('partner_id', partnerId)
-  
-  const activeDeals = deals?.filter(d => d.status === 'active' || d.status === 'pending').length || 0
-  const dealsWon = deals?.filter(d => d.status === 'completed').length || 0
-  const totalCommissions = deals?.filter(d => d.payment_status === 'paid').reduce((sum, d) => sum + d.commission_amount, 0) || 0
-  const pendingCommissions = deals?.filter(d => d.payment_status === 'pending').reduce((sum, d) => sum + d.commission_amount, 0) || 0
-  const avgDealSize = dealsWon > 0 ? (deals?.filter(d => d.status === 'completed').reduce((sum, d) => sum + d.deal_value, 0) || 0) / dealsWon : 0
-  const conversionRate = (totalLeads || 0) > 0 ? (dealsWon / (totalLeads || 1)) * 100 : 0
-  
-  return {
-    total_leads: totalLeads || 0,
-    leads_this_month: leadsThisMonth || 0,
-    active_deals: activeDeals,
-    deals_won: dealsWon,
-    total_commissions: totalCommissions,
-    pending_commissions: pendingCommissions,
-    conversion_rate: conversionRate,
-    avg_deal_size: avgDealSize,
+  // Client-side: return singleton
+  if (!browserClient) {
+    browserClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
   }
+  return browserClient;
 }
+
+// Server client for API routes
+export function createSupabaseServerClient(): SupabaseClient {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    console.warn('SUPABASE_SERVICE_ROLE_KEY not set, using anon key');
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return createClient(SUPABASE_URL, serviceKey);
+}
+
+export { SUPABASE_URL, SUPABASE_ANON_KEY };
