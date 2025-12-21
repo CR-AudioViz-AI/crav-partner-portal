@@ -1,9 +1,9 @@
 // ============================================================================
 // UNIVERSAL SUPABASE CLIENT - CRAV PARTNER PORTAL
-// Complete auth and data access layer - ALL EXPORTS
+// Complete auth and data access layer - Returns { data, error } format
 // ============================================================================
 
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, User, AuthError } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kteobfyferrukqeolofj.supabase.co';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZW9iZnlmZXJydWtxZW9sb2ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxOTcyNjYsImV4cCI6MjA3NzU1NzI2Nn0.uy-jlF_z6qVb8qogsNyGDLHqT4HhmdRhLrW7zPv3qhY';
@@ -34,27 +34,22 @@ export function createSupabaseServerClient(): SupabaseClient {
 }
 
 // ============================================================================
-// AUTH FUNCTIONS
+// AUTH FUNCTIONS - Returns { data, error } format
 // ============================================================================
 
 export async function signIn(email: string, password: string) {
   const client = createSupabaseBrowserClient();
-  const { data, error } = await client.auth.signInWithPassword({ email, password });
-  if (error) throw error;
-  return data;
+  return client.auth.signInWithPassword({ email, password });
 }
 
 export async function signUp(email: string, password: string, metadata?: Record<string, unknown>) {
   const client = createSupabaseBrowserClient();
-  const { data, error } = await client.auth.signUp({ email, password, options: { data: metadata } });
-  if (error) throw error;
-  return data;
+  return client.auth.signUp({ email, password, options: { data: metadata } });
 }
 
 export async function signOut() {
   const client = createSupabaseBrowserClient();
-  const { error } = await client.auth.signOut();
-  if (error) throw error;
+  return client.auth.signOut();
 }
 
 export async function getUser(): Promise<User | null> {
