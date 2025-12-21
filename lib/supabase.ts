@@ -4,7 +4,7 @@
 // Dependency-free version (only requires @supabase/supabase-js)
 // ============================================================================
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 
 // Centralized Supabase configuration
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://kteobfyferrukqeolofj.supabase.co';
@@ -43,6 +43,89 @@ export function createSupabaseServerClient(): SupabaseClient {
     return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
   return createClient(SUPABASE_URL, serviceKey);
+}
+
+// ============================================================================
+// AUTH HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Sign in with email and password
+ */
+export async function signIn(email: string, password: string) {
+  const client = createSupabaseBrowserClient();
+  const { data, error } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data;
+}
+
+/**
+ * Sign up with email and password
+ */
+export async function signUp(email: string, password: string, metadata?: Record<string, unknown>) {
+  const client = createSupabaseBrowserClient();
+  const { data, error } = await client.auth.signUp({
+    email,
+    password,
+    options: {
+      data: metadata,
+    },
+  });
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data;
+}
+
+/**
+ * Sign out the current user
+ */
+export async function signOut() {
+  const client = createSupabaseBrowserClient();
+  const { error } = await client.auth.signOut();
+  
+  if (error) {
+    throw error;
+  }
+}
+
+/**
+ * Get the current authenticated user
+ */
+export async function getUser(): Promise<User | null> {
+  const client = createSupabaseBrowserClient();
+  const { data: { user }, error } = await client.auth.getUser();
+  
+  if (error) {
+    console.error('Error getting user:', error);
+    return null;
+  }
+  
+  return user;
+}
+
+/**
+ * Get the current session
+ */
+export async function getSession() {
+  const client = createSupabaseBrowserClient();
+  const { data: { session }, error } = await client.auth.getSession();
+  
+  if (error) {
+    console.error('Error getting session:', error);
+    return null;
+  }
+  
+  return session;
 }
 
 export { SUPABASE_URL, SUPABASE_ANON_KEY };
