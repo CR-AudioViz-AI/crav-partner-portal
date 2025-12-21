@@ -1,6 +1,6 @@
 // ============================================================================
 // UNIVERSAL SUPABASE CLIENT - CRAV PARTNER PORTAL
-// Complete auth and data access layer - Returns { data, error } format
+// Complete auth and data access layer - All functions match page expectations
 // ============================================================================
 
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
@@ -34,7 +34,7 @@ export function createSupabaseServerClient(): SupabaseClient {
 }
 
 // ============================================================================
-// AUTH FUNCTIONS - Returns { data, error } format
+// AUTH FUNCTIONS - Match page expectations exactly
 // ============================================================================
 
 export async function signIn(email: string, password: string) {
@@ -44,10 +44,7 @@ export async function signIn(email: string, password: string) {
 
 export async function signUp(email: string, password: string, metadata?: string | Record<string, unknown>) {
   const client = createSupabaseBrowserClient();
-  // Handle both string (full_name) and object metadata
-  const userMetadata = typeof metadata === 'string' 
-    ? { full_name: metadata } 
-    : metadata;
+  const userMetadata = typeof metadata === 'string' ? { full_name: metadata } : metadata;
   return client.auth.signUp({ email, password, options: { data: userMetadata } });
 }
 
@@ -56,11 +53,12 @@ export async function signOut() {
   return client.auth.signOut();
 }
 
-export async function getUser(): Promise<User | null> {
+// Returns { user } to match page expectations like: const { user } = await getUser()
+export async function getUser(): Promise<{ user: User | null }> {
   const client = createSupabaseBrowserClient();
   const { data: { user }, error } = await client.auth.getUser();
-  if (error) { console.error('Error getting user:', error); return null; }
-  return user;
+  if (error) { console.error('Error getting user:', error); }
+  return { user: user || null };
 }
 
 export async function getSession() {
