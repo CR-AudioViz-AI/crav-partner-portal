@@ -1,6 +1,5 @@
 // ============================================================================
 // UNIVERSAL SUPABASE CLIENT - CRAV PARTNER PORTAL
-// Complete auth and data access layer - Returns formats expected by pages
 // ============================================================================
 
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
@@ -33,10 +32,7 @@ export function createSupabaseServerClient(): SupabaseClient {
   return createClient(SUPABASE_URL, serviceKey);
 }
 
-// ============================================================================
 // AUTH FUNCTIONS
-// ============================================================================
-
 export async function signIn(email: string, password: string) {
   const client = createSupabaseBrowserClient();
   return client.auth.signInWithPassword({ email, password });
@@ -72,10 +68,7 @@ export async function getSession() {
   return session;
 }
 
-// ============================================================================
 // TYPES
-// ============================================================================
-
 export interface Partner {
   id: string;
   user_id: string;
@@ -86,7 +79,7 @@ export interface Partner {
   commission_rate: number;
   created_at: string;
   updated_at: string;
-  [key: string]: unknown; // Allow additional fields
+  [key: string]: unknown;
 }
 
 export interface Deal {
@@ -140,13 +133,10 @@ export interface PartnerApplication {
   website?: string;
   experience?: string;
   message?: string;
-  [key: string]: unknown; // Allow additional fields
+  [key: string]: unknown;
 }
 
-// ============================================================================
 // PARTNER FUNCTIONS
-// ============================================================================
-
 export async function getPartnerByUserId(userId: string): Promise<Partner | null> {
   const { data, error } = await supabase.from('partners').select('*').eq('user_id', userId).single();
   if (error) { console.error('Error fetching partner:', error); return null; }
@@ -168,7 +158,7 @@ export async function getLeadsByPartnerId(partnerId: string): Promise<Lead[]> {
 export async function getDocuments(partnerId?: string): Promise<Document[]> {
   let query = supabase.from('documents').select('*').order('created_at', { ascending: false });
   if (partnerId) {
-    query = query.or(\`partner_id.eq.\${partnerId},partner_id.is.null\`);
+    query = query.or("partner_id.eq." + partnerId + ",partner_id.is.null");
   }
   const { data, error } = await query;
   if (error) { console.error('Error fetching documents:', error); return []; }
@@ -184,7 +174,6 @@ export async function getDashboardStats(partnerId: string): Promise<DashboardSta
   return { totalDeals, totalCommission, pendingCommission, conversionRate: Math.round(conversionRate * 10) / 10 };
 }
 
-// submitPartnerApplication takes an application object and returns { data, error } format
 export async function submitPartnerApplication(application: Record<string, unknown>): Promise<{ data: Partner | null; error: Error | null }> {
   try {
     const { data, error } = await supabase.from('partner_applications').insert(application).select().single();
