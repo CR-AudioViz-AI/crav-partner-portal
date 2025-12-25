@@ -1,18 +1,21 @@
 import Script from 'next/script';
-import type { Metadata } from 'next'
-import { Toaster } from 'sonner'
+import type { Metadata, Viewport } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'CR AudioViz AI Partner Portal',
-  description: 'Join the CR AudioViz AI Partner Program - Earn commissions selling AI-powered business tools',
-  keywords: 'partner program, sales, commission, AI tools, CR AudioViz AI',
-  authors: [{ name: 'CR AudioViz AI' }],
-  openGraph: {
-    title: 'CR AudioViz AI Partner Portal',
-    description: 'Join the CR AudioViz AI Partner Program and earn up to 25% commission',
-    type: 'website',
-  },
+  description: 'Part of the CR AudioViz AI creative ecosystem',
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({
@@ -22,17 +25,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50">
-        {children}
-        <Toaster 
-          position="top-right" 
-          richColors 
-          closeButton
-          toastOptions={{
-            duration: 4000,
-          }}
-        />
-              {/* Javari AI Assistant */}
+      <head>
+        <meta name="format-detection" content="telephone=no" />
+      </head>
+      <body className={`${inter.className} min-h-screen min-h-[100dvh]`}>
+        <div className="min-h-screen min-h-[100dvh] bg-gradient-to-br from-gray-50 to-gray-100">
+          {children}
+        </div>
         <Script src="https://javariai.com/embed.js" strategy="lazyOnload" />
       </body>
     </html>
