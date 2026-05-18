@@ -32,6 +32,6 @@ export async function getDealsByPartnerId(partnerId: string) {
   return data ?? []
 }
 
-export async function signUp(email: string, password: string, metadata?: Record<string, unknown>) {
-  return supabase.auth.signUp({ email, password, options: { data: metadata } })
+export async function signUp(email: string, password: string, metadata?: object) {
+  return supabase.auth.signUp({ email, password, options: { data: metadata as Record<string,unknown> | undefined } })
 }
