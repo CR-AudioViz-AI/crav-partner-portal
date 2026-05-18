@@ -31,3 +31,7 @@ export async function getDealsByPartnerId(partnerId: string) {
   const { data } = await supabaseAdmin.from('partner_deals').select('*').eq('partner_id', partnerId)
   return data ?? []
 }
+
+export async function signUp(email: string, password: string, metadata?: Record<string, unknown>) {
+  return supabase.auth.signUp({ email, password, options: { data: metadata } })
+}
