@@ -74,7 +74,7 @@ export default function DashboardPage() {
 
   const loadDashboard = async () => {
     try {
-      const { user } = await getUser()
+      const user = await getUser()
       if (user) {
         const { data: partnerData } = await getPartnerByUserId(user.id)
         if (partnerData) {
