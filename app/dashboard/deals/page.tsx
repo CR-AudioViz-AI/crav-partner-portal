@@ -42,7 +42,7 @@ export default function DealsPage() {
 
   const loadDeals = async () => {
     try {
-      const { user } = await getUser()
+      const user = await getUser()
       if (user) {
         const { data: partner } = await getPartnerByUserId(user.id)
         if (partner) {
