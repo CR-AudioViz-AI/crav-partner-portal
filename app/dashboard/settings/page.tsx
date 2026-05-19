@@ -45,7 +45,7 @@ export default function SettingsPage() {
     try {
       const user = await getUser()
       if (user) {
-        const { data: partnerData } = await getPartnerByUserId(user.id)
+        const data = await getPartnerByUserId(user.id)
         if (partnerData) {
           setPartner(partnerData)
           setFormData({
