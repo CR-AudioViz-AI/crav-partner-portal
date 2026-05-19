@@ -41,19 +41,19 @@ export async function getUser() {
   return user ?? null
 }
 export async function getPartnerByUserId(userId: string) {
-  const { data } = await getAdmin().from('partners').select('*').eq('user_id', userId).single()
+  const data = await getAdmin().from('partners').select('*').eq('user_id', userId).single()
   return data
 }
 export async function getDealsByPartnerId(partnerId: string) {
-  const { data } = await getAdmin().from('partner_deals').select('*').eq('partner_id', partnerId)
+  const data = await getAdmin().from('partner_deals').select('*').eq('partner_id', partnerId)
   return data ?? []
 }
 export async function getLeadsByPartnerId(partnerId: string) {
-  const { data } = await getAdmin().from('partner_leads').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
+  const data = await getAdmin().from('partner_leads').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
   return data ?? []
 }
 export async function getDocuments(partnerId: string) {
-  const { data } = await getAdmin().from('partner_documents').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
+  const data = await getAdmin().from('partner_documents').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
   return data ?? []
 }
 export async function getDashboardStats(partnerId: string) {
