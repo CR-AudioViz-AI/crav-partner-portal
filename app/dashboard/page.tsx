@@ -76,7 +76,7 @@ export default function DashboardPage() {
     try {
       const user = await getUser()
       if (user) {
-        const { data: partner } = await getPartnerByUserId(user.id)
+        const { data: partnerData } = await getPartnerByUserId(user.id)
         if (partnerData) {
           setPartner(partnerData)
           const statsData = await getDashboardStats(partnerData.id)
