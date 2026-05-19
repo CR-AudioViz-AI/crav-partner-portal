@@ -57,11 +57,11 @@ export default function DocumentsPage() {
     try {
       const user = await getUser()
       if (user) {
-        const { data: partner } = await getPartnerByUserId(user.id)
+        const { data: partnerData } = await getPartnerByUserId(user.id)
         if (partnerData) {
           setPartner(partnerData)
           const docsResp = await getDocuments(partnerData.tier)
-          setDocuments(docsResp?.data || [])
+          setDocuments(docsResp || [])
         }
       }
     } catch (error) {
