@@ -48,8 +48,8 @@ export function BrandedHeader({ appName, appLogo, quickLinks = [] }: BrandedHead
         // Fetch credits
         const creditsResult = await CentralServices.Credits.getBalance();
         if (creditsResult.success) {
-          setCredits(creditsResult.data?.balance || 0);
-          setPlan(creditsResult.data?.plan || 'free');
+          setCredits((creditsResult.data as any)?.balance || 0);
+          setPlan((creditsResult.data as any)?.plan || 'free');
         }
       }
     } catch (error) {
