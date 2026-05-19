@@ -50,11 +50,11 @@ export async function getDealsByPartnerId(partnerId: string) {
 }
 export async function getLeadsByPartnerId(partnerId: string) {
   const data = await getAdmin().from('partner_leads').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
-  return data ?? []
+  return (data as any)?.data ?? []
 }
 export async function getDocuments(partnerId: string) {
   const data = await getAdmin().from('partner_documents').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
-  return data ?? []
+  return (data as any)?.data ?? []
 }
 export async function getDashboardStats(partnerId: string) {
   const [deals, leads, docs] = await Promise.all([
