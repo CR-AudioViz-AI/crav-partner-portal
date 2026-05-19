@@ -1,37 +1,76 @@
-// lib/supabase.ts — CR AudioViz AI
-// May 2026 — javari-partners
-export const dynamic = 'force-dynamic'
-import { createClient } from '@supabase/supabase-js'
+// lib/supabase.ts — CR AudioViz AI  javari-partners
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const SVC  = process.env.SUPABASE_SERVICE_ROLE_KEY || ANON
+function getUrl() { return process.env.NEXT_PUBLIC_SUPABASE_URL! }
+function getAnon() { return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! }
+function getSvc() { return process.env.SUPABASE_SERVICE_ROLE_KEY || getAnon() }
 
-export const supabase = createClient(URL, ANON)
-export const supabaseAdmin = createClient(URL, SVC, { auth: { persistSession: false } })
+let _supabase: SupabaseClient | null = null
+let _admin: SupabaseClient | null = null
+
+function getSupabase(): SupabaseClient {
+  if (!_supabase) _supabase = createClient(getUrl(), getAnon())
+  return _supabase
+}
+function getAdmin(): SupabaseClient {
+  if (!_admin) _admin = createClient(getUrl(), getSvc(), { auth: { persistSession: false } })
+  return _admin
+}
+
+export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
+  get(_t, prop) { return (getSupabase() as unknown as Record<string, unknown>)[prop as string] }
+})
+export const supabaseAdmin: SupabaseClient = new Proxy({} as SupabaseClient, {
+  get(_t, prop) { return (getAdmin() as unknown as Record<string, unknown>)[prop as string] }
+})
 
 export async function signIn(email: string, password: string) {
-  return supabase.auth.signInWithPassword({ email, password })
+  return getSupabase().auth.signInWithPassword({ email, password })
 }
 export async function signOut() {
-  return supabase.auth.signOut()
+  return getSupabase().auth.signOut()
 }
 export async function getSession() {
-  return supabase.auth.getSession()
+  return getSupabase().auth.getSession()
 }
-export async function getUser(c?: ReturnType<typeof createClient>) {
-  const { data: { user } } = await (c ?? supabase).auth.getUser()
+export async function signUp(email: string, password: string, metadata?: object) {
+  return getSupabase().auth.signUp({ email, password, options: { data: metadata as Record<string, unknown> | undefined } })
+}
+export async function getUser() {
+  const { data: { user } } = await getSupabase().auth.getUser()
   return user ?? null
 }
 export async function getPartnerByUserId(userId: string) {
-  const { data } = await supabaseAdmin.from('partners').select('*').eq('user_id', userId).single()
+  const { data } = await getAdmin().from('partners').select('*').eq('user_id', userId).single()
   return data
 }
 export async function getDealsByPartnerId(partnerId: string) {
-  const { data } = await supabaseAdmin.from('partner_deals').select('*').eq('partner_id', partnerId)
+  const { data } = await getAdmin().from('partner_deals').select('*').eq('partner_id', partnerId)
   return data ?? []
 }
-
-export async function signUp(email: string, password: string, metadata?: object) {
-  return supabase.auth.signUp({ email, password, options: { data: metadata as Record<string,unknown> | undefined } })
+export async function getLeadsByPartnerId(partnerId: string) {
+  const { data } = await getAdmin().from('partner_leads').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
+  return data ?? []
+}
+export async function getDocuments(partnerId: string) {
+  const { data } = await getAdmin().from('partner_documents').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
+  return data ?? []
+}
+export async function getDashboardStats(partnerId: string) {
+  const [deals, leads, docs] = await Promise.all([
+    getDealsByPartnerId(partnerId),
+    getLeadsByPartnerId(partnerId),
+    getDocuments(partnerId),
+  ])
+  return {
+    totalDeals: deals.length,
+    activeLeads: leads.length,
+    documents: docs.length,
+    revenue: (deals as Array<{ amount?: number }>).reduce((sum, d) => sum + (d.amount ?? 0), 0),
+  }
+}
+export async function submitPartnerApplication(data: Record<string, unknown>) {
+  const { data: result, error } = await getAdmin().from('partner_applications').insert(data).select().single()
+  if (error) throw error
+  return result
 }
