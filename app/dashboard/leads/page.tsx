@@ -40,9 +40,9 @@ export default function LeadsPage() {
     try {
       const user = await getUser()
       if (user) {
-        const { data: partner } = await getPartnerByUserId(user.id)
+        const data = await getPartnerByUserId(user.id)
         if (partner) {
-          const { data } = await getLeadsByPartnerId(partner.id)
+          const data = await getLeadsByPartnerId(partner.id)
           setLeads(data || [])
         }
       }
