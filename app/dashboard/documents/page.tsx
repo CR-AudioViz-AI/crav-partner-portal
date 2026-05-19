@@ -60,8 +60,8 @@ export default function DocumentsPage() {
         const { data: partner } = await getPartnerByUserId(user.id)
         if (partnerData) {
           setPartner(partnerData)
-          const data = await getDocuments(partnerData.tier)
-          setDocuments(data || [])
+          const docsResp = await getDocuments(partnerData.tier)
+          setDocuments(docsResp?.data || [])
         }
       }
     } catch (error) {
