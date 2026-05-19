@@ -46,7 +46,7 @@ export async function getPartnerByUserId(userId: string) {
 }
 export async function getDealsByPartnerId(partnerId: string) {
   const data = await getAdmin().from('partner_deals').select('*').eq('partner_id', partnerId)
-  return data ?? []
+  return (data as any)?.data ?? []
 }
 export async function getLeadsByPartnerId(partnerId: string) {
   const data = await getAdmin().from('partner_leads').select('*').eq('partner_id', partnerId).order('created_at', { ascending: false })
