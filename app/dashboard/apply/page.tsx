@@ -70,7 +70,7 @@ export default function ApplyPage() {
 
   const checkExistingApplication = async () => {
     try {
-      const { user } = await getUser()
+      const user = await getUser()
       if (user) {
         setFormData(prev => ({ ...prev, email: user.email || '' }))
         
@@ -115,7 +115,7 @@ export default function ApplyPage() {
     setSubmitting(true)
 
     try {
-      const { user } = await getUser()
+      const user = await getUser()
       if (!user) {
         toast.error('Please sign in to submit an application')
         return
