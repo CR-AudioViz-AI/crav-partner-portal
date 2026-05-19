@@ -59,7 +59,7 @@ export default function DashboardLayout({
           })
 
           // Try to get partner info
-          const { data: partnerData } = await getPartnerByUserId(authUser.id)
+          const data = await getPartnerByUserId(authUser.id)
           if (partnerData) {
             setPartner(partnerData)
           }
