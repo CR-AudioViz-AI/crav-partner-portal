@@ -44,10 +44,10 @@ export default function DealsPage() {
     try {
       const user = await getUser()
       if (user) {
-        const data = await getPartnerByUserId(user.id)
+        const partner = await getPartnerByUserId(user.id)
         if (partner) {
-          const data = await getDealsByPartnerId(partner.id)
-          setDeals(data || [])
+          const dealsData = await getDealsByPartnerId(partner.id)
+          setDeals(dealsData || [])
         }
       }
     } catch (error) {
