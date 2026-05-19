@@ -48,7 +48,7 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const { data, error } = await signUp(formData.email, formData.password, formData.fullName)
+      const { data, error } = await signUp(formData.email, formData.password, { full_name: formData.fullName })
       
       if (error) {
         toast.error(error.message || 'Failed to create account')
