@@ -46,7 +46,7 @@ export default function DashboardLayout({
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const { user: authUser } = await getUser()
+        const authUser = await getUser()
         if (authUser) {
           setUser({
             id: authUser.id,
