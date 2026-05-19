@@ -44,7 +44,7 @@ export default function DealsPage() {
     try {
       const user = await getUser()
       if (user) {
-        const partner = await getPartnerByUserId(user.id)
+        const { data: partner } = await getPartnerByUserId(user.id)
         if (partner) {
           const dealsData = await getDealsByPartnerId(partner.id)
           setDeals(dealsData || [])
