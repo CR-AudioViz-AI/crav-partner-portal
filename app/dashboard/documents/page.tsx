@@ -57,7 +57,7 @@ export default function DocumentsPage() {
     try {
       const user = await getUser()
       if (user) {
-        const { data: partnerData } = await getPartnerByUserId(user.id)
+        const data = await getPartnerByUserId(user.id)
         if (partnerData) {
           setPartner(partnerData)
           const data = await getDocuments(partnerData.tier)
