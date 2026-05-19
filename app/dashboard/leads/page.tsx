@@ -38,7 +38,7 @@ export default function LeadsPage() {
 
   const loadLeads = async () => {
     try {
-      const { user } = await getUser()
+      const user = await getUser()
       if (user) {
         const { data: partner } = await getPartnerByUserId(user.id)
         if (partner) {
