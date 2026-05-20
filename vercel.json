@@ -2,5 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "github": {
     "autoAlias": false
-  }
+  },
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "nextjs"
 }
