@@ -9,8 +9,8 @@ import { useEffect } from "react";
 
 export default function LoginRedirect() {
   useEffect(() => {
-    const returnTo = encodeURIComponent(window.location.origin + "/dashboard");
-    window.location.replace(`https://craudiovizai.com/login?returnTo=${returnTo}`);
+    const dest = encodeURIComponent(window.location.origin + "/dashboard");
+    window.location.replace(`https://craudiovizai.com/login?redirect=${dest}`);
   }, []);
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
