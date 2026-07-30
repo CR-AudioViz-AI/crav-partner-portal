@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   ClipboardList,
+  LifeBuoy,
   ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/dashboard/products', icon: Package, label: 'Products' },
   { href: '/dashboard/documents', icon: FileText, label: 'Documents' },
   { href: '/dashboard/apply', icon: ClipboardList, label: 'Application' },
+  { href: '/dashboard/support', icon: LifeBuoy, label: 'Support' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ]
 
