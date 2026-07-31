@@ -39,11 +39,29 @@ export default function DashboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardRow[]>([])
   const [loading, setLoading] = useState(true)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [overview, setOverview] = useState<{
+    by_app: Record<string, { deals: number; revenue: number }>
+    unresolved_fraud_flags: number
+  } | null>(null)
+  const [payout, setPayout] = useState<{
+    payout_status: string; available_cents: number; minimum_payout_cents: number
+  } | null>(null)
+  const [payoutBusy, setPayoutBusy] = useState(false)
+  const [payoutNotice, setPayoutNotice] = useState<string | null>(null)
 
   useEffect(() => {
     loadDashboard()
     loadLeaderboard()
+    loadOverview()
+    loadPayoutStatus()
   }, [])
+
+  const authHeader = async (): Promise<Record<string, string>> => {
+    const { supabase } = await import('@/lib/supabase')
+    const { data } = await supabase.auth.getSession()
+    const token = data.session?.access_token
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
 
   const loadLeaderboard = async () => {
     try {
@@ -53,6 +71,56 @@ export default function DashboardPage() {
     } catch {
       setLeaderboard([])
     }
+  }
+
+  // Real per-app revenue and fraud-flag status, driven entirely by verified
+  // deals - see app/api/partners/overview/route.ts.
+  const loadOverview = async () => {
+    try {
+      const headers = await authHeader()
+      const res = await fetch('/api/partners/overview', { headers })
+      const body = await res.json()
+      if (body.ok && body.has_partner_account) setOverview(body.overview)
+    } catch { /* leave overview null - the section renders an honest empty state */ }
+  }
+
+  // Real Stripe Connect status and available balance - see
+  // app/api/partners/payouts/route.ts. Never guessed at client-side.
+  const loadPayoutStatus = async () => {
+    try {
+      const headers = await authHeader()
+      const res = await fetch('/api/partners/payouts', { headers })
+      const body = await res.json()
+      if (body.ok) setPayout(body)
+    } catch { /* leave payout null - the widget renders a connect prompt */ }
+  }
+
+  const connectStripe = async () => {
+    setPayoutBusy(true); setPayoutNotice(null)
+    try {
+      const headers = { 'Content-Type': 'application/json', ...(await authHeader()) }
+      const res = await fetch('/api/partners/payouts', {
+        method: 'POST', headers, body: JSON.stringify({ action: 'connect_stripe' }),
+      })
+      const body = await res.json()
+      if (body.ok && body.onboarding_url) window.location.href = body.onboarding_url
+      else setPayoutNotice(body.error ?? 'Could not start Stripe onboarding.')
+    } finally { setPayoutBusy(false) }
+  }
+
+  const requestPayout = async () => {
+    setPayoutBusy(true); setPayoutNotice(null)
+    try {
+      const headers = { 'Content-Type': 'application/json', ...(await authHeader()) }
+      const res = await fetch('/api/partners/payouts', {
+        method: 'POST', headers, body: JSON.stringify({ action: 'request_payout' }),
+      })
+      const body = await res.json()
+      setPayoutNotice(body.ok
+        ? (body.status === 'held_for_review' ? 'Payout requested — held briefly for a routine review.' : 'Payout sent.')
+        : (body.error ?? 'Could not process the payout request.'))
+      if (body.ok) await loadPayoutStatus()
+    } finally { setPayoutBusy(false) }
   }
 
   const loadDashboard = async () => {
@@ -275,6 +343,75 @@ export default function DashboardPage() {
           </div>
           <div className="text-2xl font-bold text-gray-900">{formatCurrency(displayStats.avg_deal_size)}</div>
           <p className="text-xs text-gray-500 mt-1">Across your closed deals</p>
+        </div>
+      </div>
+
+      {/* Revenue by app + payouts - the accurate, verified core of this
+          dashboard. Every number here traces back to a real subscription,
+          never a self-reported deal amount. */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Package className="w-6 h-6 text-indigo-500" />
+            <h2 className="font-bold text-gray-900">Revenue by App</h2>
+          </div>
+          {!overview || Object.keys(overview.by_app ?? {}).length === 0 ? (
+            <p className="text-sm text-gray-400 py-6 text-center">
+              No verified deals yet — this fills in as real, subscription-backed sales close.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {Object.entries(overview.by_app).map(([slug, v]) => (
+                <div key={slug} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50">
+                  <span className="font-medium text-gray-900">{slug}</span>
+                  <div className="text-right">
+                    <div className="font-semibold text-gray-900">{formatCurrency(v.revenue)}</div>
+                    <div className="text-xs text-gray-500">{v.deals} deal{v.deals === 1 ? '' : 's'}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {overview && overview.unresolved_fraud_flags > 0 && (
+            <div className="mt-4 flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-lg p-3">
+              <AlertTriangle className="w-4 h-4" />
+              {overview.unresolved_fraud_flags} item{overview.unresolved_fraud_flags === 1 ? '' : 's'} under routine review before payout.
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <DollarSign className="w-6 h-6 text-green-500" />
+            <h2 className="font-bold text-gray-900">Payouts</h2>
+          </div>
+          {!payout ? (
+            <p className="text-sm text-gray-400">Loading payout status…</p>
+          ) : payout.payout_status !== 'active' ? (
+            <div>
+              <p className="text-sm text-gray-600 mb-3">
+                Connect a Stripe account to receive real payouts. This takes a few minutes and
+                is handled directly by Stripe — we never see or store your bank details.
+              </p>
+              <button type="button" disabled={payoutBusy} onClick={connectStripe}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
+                {payoutBusy ? 'Starting…' : 'Connect Stripe'}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="text-3xl font-bold text-gray-900">{formatCurrency(payout.available_cents / 100)}</div>
+              <p className="text-sm text-gray-500 mb-4">
+                Available now · ${(payout.minimum_payout_cents / 100).toFixed(0)} minimum to request
+              </p>
+              <button type="button" disabled={payoutBusy || payout.available_cents < payout.minimum_payout_cents}
+                onClick={requestPayout}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                {payoutBusy ? 'Processing…' : 'Request Payout'}
+              </button>
+            </div>
+          )}
+          {payoutNotice && <p className="text-xs text-gray-600 mt-3">{payoutNotice}</p>}
         </div>
       </div>
 

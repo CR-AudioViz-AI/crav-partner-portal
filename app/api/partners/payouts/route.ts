@@ -37,7 +37,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   const [{ data: payouts }, { data: closedDeals }] = await Promise.all([
     sb.from("partner_payouts").select("*").eq("partner_id", partner.id).order("requested_at", { ascending: false }),
-    sb.from("partner_deals").select("id, amount, status").eq("partner_id", partner.id).eq("status", "closed"),
+    // Only deals with a verified, real subscription behind them count toward
+    // a payout - a self-reported "closed" deal with no subscription_id is
+    // never eligible for real money, no matter what its amount field says.
+    sb.from("partner_deals").select("id, amount, status").eq("partner_id", partner.id)
+      .eq("status", "closed").not("subscription_id", "is", null),
   ]);
 
   const alreadyPaidDealIds = new Set((payouts ?? []).flatMap(p => (p.deal_ids as string[]) ?? []));
@@ -111,7 +115,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { data: payouts } = await sb.from("partner_payouts").select("deal_ids").eq("partner_id", partner.id);
     const alreadyPaidDealIds = new Set((payouts ?? []).flatMap(p => (p.deal_ids as string[]) ?? []));
     const { data: closedDeals } = await sb.from("partner_deals")
-      .select("id, amount").eq("partner_id", partner.id).eq("status", "closed");
+      .select("id, amount").eq("partner_id", partner.id).eq("status", "closed")
+      .not("subscription_id", "is", null); // verified deals only - same rule as GET above
     const unpaidDeals = (closedDeals ?? []).filter(d => !alreadyPaidDealIds.has(d.id));
     const commissionRate = Number(partner.commission_rate ?? 0.25);
     const amountCents = Math.round(unpaidDeals.reduce((s, d) => s + Number(d.amount ?? 0), 0) * commissionRate * 100);
