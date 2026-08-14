@@ -217,7 +217,7 @@ INSERT INTO products (name, description, tier, difficulty, base_price, commissio
   ('Market Oracle', '5 AI models compete to predict stocks and crypto - gamified investment research platform', 2, 'medium', 1499, 25, 10, 'Traders, Investment Clubs, Educators', 30, true),
   ('CRAudioViz Pro', 'Full AI platform access with 60+ tools, Javari AI assistant, and priority support', 3, 'hard', 4999, 18, 5, 'SMBs, Agencies, Consultants', 45, true),
   ('Enterprise Solution', 'White-label platform deployment with custom branding, dedicated support, and SLA', 4, 'expert', 9999, 15, 3, 'Enterprise, Government, Large Organizations', 90, true),
-  ('CRAIverse Social', 'Social impact platform with 20 modules for nonprofits, veterans, first responders', 3, 'hard', 2999, 22, 8, 'Nonprofits, Government, Social Enterprises', 45, true);
+  ('Javariverse Social', 'Social impact platform with 20 modules for nonprofits, veterans, first responders', 3, 'hard', 2999, 22, 8, 'Nonprofits, Government, Social Enterprises', 45, true);
 
 -- ============================================
 -- CREATE TRIGGER FUNCTION

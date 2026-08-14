@@ -182,7 +182,7 @@ const demoProducts: Product[] = [
   },
   {
     id: '6',
-    name: 'CRAIverse Social',
+    name: 'Javariverse Social',
     description: 'Virtual world with 20 social impact modules serving veterans, first responders, faith communities, and underserved populations.',
     short_pitch: 'AI-powered social impact for the communities that matter',
     tier: 3,
@@ -204,7 +204,7 @@ const demoProducts: Product[] = [
     new_product_bonus: 15,
     new_product_bonus_expires: '2025-12-31',
     objection_handlers: [
-      { objection: 'Our community is not tech-savvy', response: 'CRAIverse was designed for accessibility. 89% of users over 65 report easy adoption.' },
+      { objection: 'Our community is not tech-savvy', response: 'Javariverse was designed for accessibility. 89% of users over 65 report easy adoption.' },
     ],
     competitor_comparisons: [],
     created_at: '2025-11-01',
@@ -241,7 +241,7 @@ const demoBundles: ProductBundle[] = [
   {
     id: 'b3',
     name: 'Social Impact Package',
-    description: 'Full platform for non-profits: CRAIverse Social + CRAudioViz Pro',
+    description: 'Full platform for non-profits: Javariverse Social + CRAudioViz Pro',
     products: ['6', '4'],
     bundle_price: 6999,
     savings_amount: 999,
