@@ -1,8 +1,28 @@
 import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import { track } from '@/lib/analytics/track'
+import { NextResponse, type NextFetchEvent } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
+  // 2026-08-16: this middleware has five return paths and no shared response
+  // object, so tracking runs at the top before any branch. Every request is
+  // logged whether it is served, redirected to login, or rejected.
+  try {
+    event.waitUntil(track({
+      path: request.nextUrl.pathname,
+      method: request.method,
+      userAgent: request.headers.get('user-agent') ?? '',
+      referrer: request.headers.get('referer'),
+      ip: (request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || null,
+      country: request.headers.get('x-vercel-ip-country'),
+      appId: request.nextUrl.hostname,
+      sessionId: request.cookies.get('zsid')?.value ?? null,
+      userId: null,
+    }))
+  } catch {
+    // Never let tracking break a request.
+  }
+
   const { pathname } = request.nextUrl
 
   // Public routes that don't require authentication
