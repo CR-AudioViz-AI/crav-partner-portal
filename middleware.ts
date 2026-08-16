@@ -26,7 +26,14 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/', '/auth/login', '/auth/register', '/auth/callback']
+  // 2026-08-16: /robots.txt and /sitemap.xml were missing here, so the auth
+  // gate redirected every crawler to the login page. Googlebot asking for
+  // robots.txt received 'Redirecting...' and indexed nothing. Crawl surfaces
+  // are public by definition — a sitemap behind a login is not a sitemap.
+  const publicRoutes = [
+    '/', '/auth/login', '/auth/register', '/auth/callback',
+    '/robots.txt', '/sitemap.xml', '/manifest.json', '/favicon.ico',
+  ]
   
   if (publicRoutes.includes(pathname)) {
     return NextResponse.next()
