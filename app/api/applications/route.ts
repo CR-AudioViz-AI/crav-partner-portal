@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { secretKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const SUPABASE_URL = supabaseUrl()
+const supabaseServiceKey = secretKey()
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const supabase = createClient(SUPABASE_URL, supabaseServiceKey)
     const body = await request.json()
 
     // Validate required fields
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const supabase = createClient(SUPABASE_URL, supabaseServiceKey)
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('user_id')
 

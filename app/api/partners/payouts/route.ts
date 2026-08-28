@@ -7,11 +7,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
+import { secretKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
 export const dynamic = "force-dynamic";
 
-const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const SB_SVC = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const SB_URL = supabaseUrl();
+const SB_SVC = secretKey();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", { apiVersion: "2024-06-20" });
 
 async function userFrom(req: NextRequest, sb: SupabaseClient): Promise<string | null> {
