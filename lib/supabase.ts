@@ -1,9 +1,10 @@
 // lib/supabase.ts — CR AudioViz AI  javari-partners
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { secretKey, publishableKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
-function getUrl() { return process.env.NEXT_PUBLIC_SUPABASE_URL! }
-function getAnon() { return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! }
-function getSvc() { return process.env.SUPABASE_SERVICE_ROLE_KEY || getAnon() }
+function getUrl() { return supabaseUrl() }
+function getAnon() { return publishableKey() }
+function getSvc() { return secretKey() || getAnon() }
 
 let _supabase: SupabaseClient | null = null
 let _admin: SupabaseClient | null = null

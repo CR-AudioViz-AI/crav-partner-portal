@@ -6,11 +6,12 @@
 // CR AudioViz AI · EIN 39-3646201 · July 30, 2026
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { secretKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
 export const dynamic = "force-dynamic";
 
-const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const SB_SVC = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
+const SB_URL = supabaseUrl();
+const SB_SVC = secretKey();
 
 async function requireAdmin(req: NextRequest, sb: SupabaseClient): Promise<string | null> {
   const h = req.headers.get("authorization");

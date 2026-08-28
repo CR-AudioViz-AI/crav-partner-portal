@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { track } from '@/lib/analytics/track'
 import { NextResponse, type NextFetchEvent } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { publishableKey, supabaseUrl } from "@craudioviz/platform-sdk";
 
 export async function middleware(request: NextRequest, event: NextFetchEvent) {
   // 2026-08-16: this middleware has five return paths and no shared response
@@ -40,8 +41,8 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   }
 
   // Check for auth token in cookies
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const SUPABASE_URL = supabaseUrl()
+  const supabaseAnonKey = publishableKey()
   
   // Get the auth token from cookies
   const authCookie = request.cookies.get('sb-kteobfyferrukqeolofj-auth-token')
@@ -52,7 +53,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    const supabase = createClient(SUPABASE_URL, supabaseAnonKey)
     const { data: { user }, error } = await supabase.auth.getUser(authCookie.value)
 
     if (error || !user) {
