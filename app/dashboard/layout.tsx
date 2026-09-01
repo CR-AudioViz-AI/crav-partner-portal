@@ -16,6 +16,7 @@ import {
   ClipboardList,
   LifeBuoy,
   ChevronRight,
+  Share2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { signOut, getUser, getPartnerByUserId } from '@/lib/supabase'
@@ -30,7 +31,15 @@ const navItems = [
   { href: '/dashboard/documents', icon: FileText, label: 'Documents' },
   { href: '/dashboard/apply', icon: ClipboardList, label: 'Application' },
   { href: '/dashboard/support', icon: LifeBuoy, label: 'Support' },
-  { href: '/dashboard/referrals', icon: Link, label: 'Referrals' },
+  // 2026-09-01: Share2, not Link.
+  //
+  // The original said Link2, which lucide does not export. I "fixed" that to Link —
+  // but `Link` in this file is NEXT'S navigation component, imported at the top, so
+  // the nav rendered <Link className=... /> with no href and the compiler caught it.
+  //
+  // Correcting one undefined name to a defined but WRONG one is worse than the
+  // original error: it compiles far enough to look finished.
+  { href: '/dashboard/referrals', icon: Share2, label: 'Referrals' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ]
 
