@@ -30,7 +30,7 @@ const navItems = [
   { href: '/dashboard/documents', icon: FileText, label: 'Documents' },
   { href: '/dashboard/apply', icon: ClipboardList, label: 'Application' },
   { href: '/dashboard/support', icon: LifeBuoy, label: 'Support' },
-  { href: '/dashboard/referrals', icon: Link2, label: 'Referrals' },
+  { href: '/dashboard/referrals', icon: Link, label: 'Referrals' },
   { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ]
 
