@@ -43,6 +43,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     p_partner_type: body.partner_type,
     p_reviewer: adminId,
   });
-  if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ ok: false, error: 'The request could not be completed.', code: 'INTERNAL_ERROR' }, { status: 500 });
   return NextResponse.json(data);
 }
