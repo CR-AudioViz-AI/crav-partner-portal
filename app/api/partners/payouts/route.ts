@@ -136,7 +136,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       status: (openFlags ?? []).length > 0 ? "held_for_review" : "processing",
       hold_reason: (openFlags ?? []).length > 0 ? "Pending fraud review" : null,
     }).select("id, status").single();
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: 'The request could not be completed.', code: 'INTERNAL_ERROR' }, { status: 500 });
 
     if (payout.status === "processing") {
       try {
